@@ -151,7 +151,7 @@ export async function registerReactSSREngine(app: express.Application, viewDirec
     if (process.env.NODE_ENV == "test") {
       app.set('view engine', 'tsx');
       app.engine('tsx', (path: string, options: object, callback) => callback(null, "<html></html>"))
-    } else if (process.env.NODE_ENV != "production") {
+    } else if ((process as any)[Symbol.for('ts-node.register.instance')]) {
       app.set('view engine', 'tsx');
       app.engine('tsx', renderFile);
     } else {
@@ -180,7 +180,6 @@ export async function registerReactSSREngine(app: express.Application, viewDirec
           } else {
             throw new Error(`express-react-ssr-engine: Unsupported File Type ${ext}`)
           }
-          console.log("Compiled " + file)                            
         });
         resolve()
       } catch(e) {
