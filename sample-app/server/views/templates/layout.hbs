@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script crossorigin src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+        <script src="{{reactScriptPath}}"></script>
+    </head>
+    <body>
+        <div id="root">
+            {{{reactHtml}}}
+        </div>
+        <script>
+            ReactDOM.hydrate(React.createElement(App.default, {{{reactProps}}}), document.getElementById("root"))
+        </script>
+    </body>
+</html>

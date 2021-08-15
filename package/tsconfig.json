@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+      "lib": ["es2020", "es6", "dom"],
+      "module": "commonjs",
+      "target": "es2019",
+      "esModuleInterop": true,
+      "outDir": "./build",
+      "moduleResolution": "node",
+      "noImplicitAny": true
+    },
+    "exclude": ["node_modules"]
+}

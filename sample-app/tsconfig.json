@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "lib": ["es2020", "es6", "dom"],
+      "module": "commonjs",
+      "target": "es2019",
+      "esModuleInterop": true,
+      "outDir": "./build",
+      "moduleResolution": "node",
+      "jsx": "react-jsx",
+      "baseUrl": ".",
+      "paths": {
+        "express-react-ssr-engine": ["node_modules/express-react-ssr-engine/src"],
+        "express-react-ssr-engine/*": ["node_modules/express-react-ssr-engine/src/*"]
+      },
+    },
+    "exclude": ["node_modules"]
+}
