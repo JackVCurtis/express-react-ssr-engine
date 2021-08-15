@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "test": "jest -i",
-    "build": "tsc && cp -r server/views/templates build/views && cp -r server/views/styles build/views",
+    "build": "tsc && cp -r server/views/templates build/views && cp -r server/views/styles build/views && cp -r server/components/styles build/components",
     "start": "ts-node server",
     "clean": "rm -r server/dist && rm -r build"
   },
