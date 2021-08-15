@@ -7,7 +7,8 @@ module.exports = {
     testPathIgnorePatterns: [
         "/dist/",
          "/node_modules/", 
-         "/server/views/"
+         "/views/",
+         "/components/"
     ],
     roots: [
         '<rootDir>/../../'

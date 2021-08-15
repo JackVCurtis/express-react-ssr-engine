@@ -9,6 +9,9 @@ export async function configureServer(): Promise<Application> {
     app.get('/', (req: Request, res: Response) => {
         res.render('landing', { props: { message: "Hello from the server"}})
     })
+    app.get('/users', (req: Request, res: Response) => {
+        res.render('users/index', { props: {users: [{ name: 'Freddie Mercury' }, { name: 'Tupac Shakur' }] }})
+    })
 
     return app
 }

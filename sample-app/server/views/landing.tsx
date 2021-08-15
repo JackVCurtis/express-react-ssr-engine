@@ -1,3 +1,4 @@
+
 export default function LandingPage({ message }) {
     return (
         <div>

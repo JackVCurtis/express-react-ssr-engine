@@ -5,6 +5,7 @@ module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'jsdom',
     roots: [
-        '<rootDir>/../../server/views'
+        '<rootDir>/../../server/views',
+        '<rootDir>/../../server/components'
     ],
 }
