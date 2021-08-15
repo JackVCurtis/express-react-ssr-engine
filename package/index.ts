@@ -9,10 +9,10 @@ import { glob } from 'glob';
 
 const cache: { [key: string]: { contentPath: string, component?: any } } = {}
 
-function render(template: any, filename: string, props: object, callback: (e?: any, string?: string) => void) {
+function render(template: any, viewDirectory: string, filename: string, props: object, callback: (e?: any, string?: string) => void) {
   const cached = cache[filename]
   const parsedFilename = path.parse(filename)
-  const cachedStyle = cache[path.join(parsedFilename.dir.replace('views', 'views/styles'), `${parsedFilename.name}.scss`)]
+  const cachedStyle = cache[path.join(parsedFilename.dir.replace(viewDirectory, `${viewDirectory}/styles`), `${parsedFilename.name}.scss`)]
   const element = React.createElement(cached.component.default, props)
   const reactHtml = ReactDOMServer.renderToString(element)
 
@@ -120,11 +120,11 @@ function renderFileFactory(viewDirectory: string) {
     if (!cache[filename]?.component) {
       import(filename).then(component => {
         cache[filename].component = component
-        render(indexTemplate, filename, options.props, callback)
+        render(indexTemplate, viewDirectory, filename, options.props, callback)
       })
 
     } else {
-      render(indexTemplate, filename, options.props, callback)
+      render(indexTemplate, viewDirectory, filename, options.props, callback)
     }
   }
 }
