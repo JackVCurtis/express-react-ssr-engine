@@ -1,31 +1,42 @@
-import ReactDOMServer from 'react-dom/server';
 import Handlebars from 'handlebars'
 import fs from 'fs'
 import path from 'path'
 import { Stats, webpack } from 'webpack'
-import React from 'react'
-import express from 'express';
-import { glob } from 'glob';
+import express from 'express'
+import { glob } from 'glob'
 
-const cache: { [key: string]: { contentPath: string, component?: any } } = {}
+const cache: { [key: string]: { contentPath: string, component?: any, hash?: string } } = {}
 
-function render(template: any, viewDirectory: string, filename: string, props: object, callback: (e?: any, string?: string) => void) {
+function render(template: any, react: any, reactDomServer: any, viewDirectory: string, filename: string, props: object, callback: (e?: any, string?: string) => void) {
   const cached = cache[filename]
   const parsedFilename = path.parse(filename)
   const cachedStyle = cache[path.join(parsedFilename.dir.replace(viewDirectory, `${viewDirectory}/styles`), `${parsedFilename.name}.scss`)]
-  const element = React.createElement(cached.component.default, props)
-  const reactHtml = ReactDOMServer.renderToString(element)
+  const element = react.createElement(cached.component.default, props)
+  const reactHtml = reactDomServer.renderToString(element)
 
-  callback(null, template({ 
+  callback(null, template({
     reactScriptPath: cached.contentPath,
-    reactHtml: reactHtml, 
+    reactHtml: reactHtml,
     reactProps: JSON.stringify(props),
     stylePath: cachedStyle ? cachedStyle.contentPath : ''
   }))
 }
 
-function compilerFactory(viewDirectory: string, filename: string, bundleName: string) {
-
+function compilerFactory(viewDirectory: string, filename: string, bundleName: string, options: ReactSSROptions) {
+  const externals = Object.assign({
+    react: {
+      commonjs: "react",
+      commonjs2: "react",
+      amd: "React",
+      root: "React"
+    },
+    "react-dom": {
+      commonjs: "react-dom",
+      commonjs2: "react-dom",
+      amd: "ReactDOM",
+      root: "ReactDOM"
+    }
+  }, options.externals)
   const config = {
     mode: "production" as "production",
     entry: {
@@ -42,25 +53,13 @@ function compilerFactory(viewDirectory: string, filename: string, bundleName: st
         name: "App",
         type: "umd",
       },
+      globalObject: 'this',
       assetModuleFilename: `${bundleName}.[hash].css`
     },
     resolve: {
       extensions: [".js", ".jsx", ".ts", ".tsx", ".css", ".sass", ".scss"]
     },
-    externals: {
-      react: {
-        commonjs: "react",
-        commonjs2: "react",
-        amd: "React",
-        root: "React"
-      },
-      "react-dom": {
-        commonjs: "react-dom",
-        commonjs2: "react-dom",
-        amd: "ReactDOM",
-        root: "ReactDOM"
-      }
-    },
+    externals: externals,
     module: {
       rules: [
         {
@@ -79,7 +78,7 @@ function compilerFactory(viewDirectory: string, filename: string, bundleName: st
               "presets": ["@babel/env", "@babel/react"],
             }
           }],
-          exclude: /node_modules/, 
+          exclude: /node_modules/,
         },
         {
           test: /\.(sa|sc|c)ss$/,
@@ -94,9 +93,9 @@ function compilerFactory(viewDirectory: string, filename: string, bundleName: st
   return webpack(config)
 }
 
-async function compileFile(filename: string, viewDirectory: string, bundleName: string): Promise<Stats> {
+async function compileFile(filename: string, viewDirectory: string, bundleName: string, options: ReactSSROptions): Promise<Stats> {
   return new Promise((resolve, reject) => {
-    const compiler = compilerFactory(viewDirectory, filename, bundleName)
+    const compiler = compilerFactory(viewDirectory, filename, bundleName, options)
 
     compiler.run((err, stats) => {
       if (err) {
@@ -113,18 +112,23 @@ async function compileFile(filename: string, viewDirectory: string, bundleName: 
 
 }
 
-function renderFileFactory(viewDirectory: string) {
+function compiledFilename(filename: string, viewDirectory: string, hash: string): string {
+  const ext = path.parse(filename).ext
+  return filename.replace(viewDirectory, path.join(viewDirectory, '..', 'dist')).replace(ext, `.${hash}.js`)
+}
+
+function renderFileFactory(viewDirectory: string, react: any, reactDomServer: any, ) {
   const indexTemplate = Handlebars.compile(fs.readFileSync(path.join(viewDirectory, 'templates/layout.hbs')).toString())
 
   return (filename: string, options: { props: object }, callback: (e?: any, string?: string) => void) => {
     if (!cache[filename]?.component) {
       import(filename).then(component => {
         cache[filename].component = component
-        render(indexTemplate, viewDirectory, filename, options.props, callback)
+        render(indexTemplate, react, reactDomServer, viewDirectory, filename, options.props, callback)
       })
 
     } else {
-      render(indexTemplate, viewDirectory, filename, options.props, callback)
+      render(indexTemplate, react, reactDomServer, viewDirectory, filename, options.props, callback)
     }
   }
 }
@@ -139,12 +143,12 @@ async function asyncForEach<T>(array: T[], callback: (v: T, i: number, array: T[
 }
 
 export interface ReactSSROptions {
-
+  externals: object
 }
 
-export async function registerReactSSREngine(app: express.Application, viewDirectory: string, options?: ReactSSROptions): Promise<void> {
+export async function registerReactSSREngine(app: express.Application, viewDirectory: string, react: any, reactDomServer: any, options?: ReactSSROptions): Promise<void> {
   return new Promise((resolve, reject) => {
-    const renderFile = renderFileFactory(viewDirectory)
+    const renderFile = renderFileFactory(viewDirectory, react, reactDomServer)
 
     app.use('/react-ssr', express.static(path.join(viewDirectory, '..', 'dist')))
     app.set('views', viewDirectory);
@@ -168,11 +172,12 @@ export async function registerReactSSREngine(app: express.Application, viewDirec
           const relativePath = path.relative(viewDirectory, file)
           const ext = path.parse(relativePath).ext
           const bundleName = relativePath.replace(path.delimiter, "_").replace(ext, "")
-          const stats = await compileFile(file, viewDirectory, bundleName)
+          const stats = await compileFile(file, viewDirectory, bundleName, options)
           if (ext.match(/(\.tsx?$)/) || ext.match(/(\.jsx?$)/)) {
             const bundleExt = 'js'
-            const contentPath = `/react-ssr/${bundleName}.${stats.compilation.hash}.${bundleExt}`
-            cache[file] = { contentPath }
+            const hash = stats.compilation.hash
+            const contentPath = `/react-ssr/${bundleName}.${hash}.${bundleExt}`
+            cache[file] = { contentPath, hash }
           } else if (ext.match(/\.(sa|sc|c)ss$/)) {
             const assetName = Object.keys(stats.compilation.assets).find(k => k.match(/\.css$/))
             const contentPath = `/react-ssr/${assetName}`
@@ -182,7 +187,7 @@ export async function registerReactSSREngine(app: express.Application, viewDirec
           }
         });
         resolve()
-      } catch(e) {
+      } catch (e) {
         reject(e)
       }
     })

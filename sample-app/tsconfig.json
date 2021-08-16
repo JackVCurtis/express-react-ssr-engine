@@ -9,8 +9,8 @@
       "jsx": "react-jsx",
       "baseUrl": ".",
       "paths": {
-        "express-react-ssr-engine": ["node_modules/express-react-ssr-engine/src"],
-        "express-react-ssr-engine/*": ["node_modules/express-react-ssr-engine/src/*"]
+        "express-react-ssr-engine": ["node_modules/express-react-ssr-engine/build"],
+        "express-react-ssr-engine/*": ["node_modules/express-react-ssr-engine/build/*"]
       },
     },
     "exclude": ["node_modules"]
