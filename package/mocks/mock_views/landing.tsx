@@ -1,9 +1,8 @@
-import React from "react";
-
 interface LandingPageProps {
     message: string
 }
-const LandingPage: React.FC<LandingPageProps> = ({ message }) => {
+
+export default function LandingPage({ message } : LandingPageProps) {
     return (
         <div>
             <h1>Landing Page</h1>
@@ -11,5 +10,3 @@ const LandingPage: React.FC<LandingPageProps> = ({ message }) => {
         </div>
     )
 }
-
-export default LandingPage
