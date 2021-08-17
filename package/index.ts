@@ -14,9 +14,9 @@ export interface ReactSSROptions {
 
 const cache: ReactSSRCache = {}
 
-export async function registerReactSSREngine(app: express.Application, viewDirectory: string, react: any, options?: ReactSSROptions): Promise<void> {
+export async function registerReactSSREngine(app: express.Application, viewDirectory: string, options?: ReactSSROptions): Promise<void> {
   await compile(viewDirectory, cache, options)
-  const renderFile = renderFnFactory(cache, viewDirectory, react)
+  const renderFile = renderFnFactory(cache, viewDirectory)
 
   app.use('/react-ssr', express.static(path.join(viewDirectory, '..', 'dist')))
   app.set('views', viewDirectory);

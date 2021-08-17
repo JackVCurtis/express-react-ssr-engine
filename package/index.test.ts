@@ -9,7 +9,7 @@ describe("registerReactSSREngine", () => {
 
     it("should compile the mock views directory", async () => {
         const app = express()
-        await registerReactSSREngine(app, path.join(__dirname, "mocks", "mock_views"), React)
+        await registerReactSSREngine(app, path.join(__dirname, "mocks", "mock_views"))
 
         app.get('/', (req, res) => res.render('landing', { props: { message: "Hello from the test" } }))
 
