@@ -6,6 +6,7 @@ module.exports = {
     testEnvironment: 'node',
     testPathIgnorePatterns: [
         "/dist/",
+        "/build/",
          "/node_modules/", 
          "/views/",
          "/components/"

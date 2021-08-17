@@ -10,7 +10,6 @@ export async function configureServer(): Promise<Application> {
         app,
         path.join(__dirname, 'views'),
         React,
-        ReactDOMServer,
         {
             externals: {
                 "react-bootstrap": {
