@@ -4,15 +4,16 @@ import path from 'path'
 import { Stats, webpack } from 'webpack'
 import express from 'express'
 import { glob } from 'glob'
+import ReactDOMServer from 'react-dom/server'
 
 const cache: { [key: string]: { contentPath: string, component?: any, hash?: string } } = {}
 
-function render(template: any, react: any, reactDomServer: any, viewDirectory: string, filename: string, props: object, callback: (e?: any, string?: string) => void) {
+function render(template: any, react: any, viewDirectory: string, filename: string, props: object, callback: (e?: any, string?: string) => void) {
   const cached = cache[filename]
   const parsedFilename = path.parse(filename)
   const cachedStyle = cache[path.join(parsedFilename.dir.replace(viewDirectory, `${viewDirectory}/styles`), `${parsedFilename.name}.scss`)]
   const element = react.createElement(cached.component.default, props)
-  const reactHtml = reactDomServer.renderToString(element)
+  const reactHtml = ReactDOMServer.renderToString(element)
 
   callback(null, template({
     reactScriptPath: cached.contentPath,
@@ -36,7 +37,7 @@ function compilerFactory(viewDirectory: string, filename: string, bundleName: st
       amd: "ReactDOM",
       root: "ReactDOM"
     }
-  }, options.externals)
+  }, options?.externals || {})
   const config = {
     mode: "production" as "production",
     entry: {
@@ -117,18 +118,18 @@ function compiledFilename(filename: string, viewDirectory: string, hash: string)
   return filename.replace(viewDirectory, path.join(viewDirectory, '..', 'dist')).replace(ext, `.${hash}.js`)
 }
 
-function renderFileFactory(viewDirectory: string, react: any, reactDomServer: any, ) {
+function renderFileFactory(viewDirectory: string, react: any) {
   const indexTemplate = Handlebars.compile(fs.readFileSync(path.join(viewDirectory, 'templates/layout.hbs')).toString())
 
   return (filename: string, options: { props: object }, callback: (e?: any, string?: string) => void) => {
     if (!cache[filename]?.component) {
       import(filename).then(component => {
         cache[filename].component = component
-        render(indexTemplate, react, reactDomServer, viewDirectory, filename, options.props, callback)
+        render(indexTemplate, react, viewDirectory, filename, options.props, callback)
       })
 
     } else {
-      render(indexTemplate, react, reactDomServer, viewDirectory, filename, options.props, callback)
+      render(indexTemplate, react, viewDirectory, filename, options.props, callback)
     }
   }
 }
@@ -146,9 +147,9 @@ export interface ReactSSROptions {
   externals: object
 }
 
-export async function registerReactSSREngine(app: express.Application, viewDirectory: string, react: any, reactDomServer: any, options?: ReactSSROptions): Promise<void> {
+export async function registerReactSSREngine(app: express.Application, viewDirectory: string, react: any, options?: ReactSSROptions): Promise<void> {
   return new Promise((resolve, reject) => {
-    const renderFile = renderFileFactory(viewDirectory, react, reactDomServer)
+    const renderFile = renderFileFactory(viewDirectory, react)
 
     app.use('/react-ssr', express.static(path.join(viewDirectory, '..', 'dist')))
     app.set('views', viewDirectory);

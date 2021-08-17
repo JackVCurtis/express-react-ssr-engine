@@ -8,5 +8,5 @@
       "moduleResolution": "node",
       "noImplicitAny": true
     },
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules", "mocks/mock_views"]
 }
