@@ -1,10 +1,9 @@
 import { webpack, Stats } from "webpack";
-import { ReactSSRCache, ReactSSROptions } from "./index";
+import { ReactSSROptions } from "./index";
 import { glob } from 'glob'
 import path from 'path'
-import memfs from 'memfs'
-import { mockFs } from "./filesystem";
-
+import { engineFs, updateCache, ReactSSRCache } from './filesystem'
+import { stat } from "fs-extra";
 
 function compilerFactory(viewDirectory: string, filename: string, bundleName: string, options: ReactSSROptions) {
     const externals = Object.assign({
@@ -75,13 +74,11 @@ function compilerFactory(viewDirectory: string, filename: string, bundleName: st
         },
     };
     const compiler = webpack(config)
-    if (process.env.NODE_ENV == "test") {
-       compiler.outputFileSystem = mockFs 
-    }
+    compiler.outputFileSystem = engineFs
     return compiler
 }
 
-async function compileFile(filename: string, viewDirectory: string, bundleName: string, options: ReactSSROptions): Promise<Stats> {
+function compileFile(filename: string, viewDirectory: string, bundleName: string, options: ReactSSROptions): Promise<Stats> {
     return new Promise((resolve, reject) => {
         const compiler = compilerFactory(viewDirectory, filename, bundleName, options)
 
@@ -89,6 +86,17 @@ async function compileFile(filename: string, viewDirectory: string, bundleName: 
             if (err) {
                 reject(err)
             }
+            if (stats.hasErrors() || stats.hasWarnings()) {
+                console.log(stats.toString({
+                    chunks: false, 
+                    colors: true
+                  }));                
+            }
+
+            if (stats.hasErrors()) {
+                reject(stats.compilation.errors)
+            }
+            
             compiler.close((err, res) => {
                 if (err) {
                     reject(err)
@@ -100,14 +108,15 @@ async function compileFile(filename: string, viewDirectory: string, bundleName: 
 
 }
 
-export async function compile(viewDirectory: string, cache: ReactSSRCache, options: ReactSSROptions): Promise<void> {
+export async function compile(viewDirectory: string, options: ReactSSROptions): Promise<void> {
+    const cache: ReactSSRCache = {}
     return new Promise<void>((resolve, reject) => {
         glob(viewDirectory + "/**/!(*.test).+(js|jsx|ts|tsx|scss)", null,  function (er, files) {
             if (er) {
                 reject(er)
             }
             const fileCompilationPromises = files.map((file) => {
-                return new Promise<void>((resolve, reject) => {
+                return new Promise<void>((resolveInner, rejectInner) => {
                     const relativePath = path.relative(viewDirectory, file)
                     const ext = path.parse(relativePath).ext
                     const bundleName = relativePath.replace(path.delimiter, "_").replace(ext, "")
@@ -125,13 +134,15 @@ export async function compile(viewDirectory: string, cache: ReactSSRCache, optio
                             } else {
                                 throw new Error(`express-react-ssr-engine: Unsupported File Type ${ext}`)
                             }
-                            resolve()
+                            resolveInner()
                         })
-                        .catch(reject)
+                        .catch(rejectInner)
                 })
             })
             Promise.all(fileCompilationPromises)
                 .then(() => {
+                    updateCache(viewDirectory, cache)
+                    console.log("cache updated")
                     resolve()
                 })
                 .catch(reject)

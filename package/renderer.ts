@@ -2,14 +2,15 @@ import Handlebars from 'handlebars'
 import fs from 'fs'
 import path from 'path'
 import ReactDOMServer from 'react-dom/server'
-import { ReactSSRCache } from './index'
+import { ReactSSRCache } from './filesystem'
 import React from 'react'
+import { getCache } from './filesystem'
 
-function render(cache: ReactSSRCache, template: any, viewDirectory: string, filename: string, props: object, callback: (e?: any, string?: string) => void) {
+function render(cache: ReactSSRCache, component: any, template: any, viewDirectory: string, filename: string, props: object, callback: (e?: any, string?: string) => void) {
     const cached = cache[filename]
     const parsedFilename = path.parse(filename)
     const cachedStyle = cache[path.join(parsedFilename.dir.replace(viewDirectory, `${viewDirectory}/styles`), `${parsedFilename.name}.scss`)]
-    const element = React.createElement(cached.component.default, props)
+    const element = React.createElement(component.default, props)
     const reactHtml = ReactDOMServer.renderToString(element)
 
     callback(null, template({
@@ -20,17 +21,13 @@ function render(cache: ReactSSRCache, template: any, viewDirectory: string, file
     }))
 }
 
-export function renderFnFactory(cache: ReactSSRCache, viewDirectory: string) {
+export function renderFnFactory(viewDirectory: string) {
+    const cache = getCache(viewDirectory)
     const indexTemplate = Handlebars.compile(fs.readFileSync(path.join(viewDirectory, 'templates', 'layout.hbs')).toString())
 
     return (filename: string, options: { props: object }, callback: (e?: any, string?: string) => void) => {
-        if (!cache[filename]?.component) {
-            import(filename).then(component => {
-                cache[filename].component = component
-                render(cache, indexTemplate, viewDirectory, filename, options.props, callback)
-            })
-        } else {
-            render(cache, indexTemplate, viewDirectory, filename, options.props, callback)
-        }
+        import(filename).then(component => {
+            render(cache, component, indexTemplate, viewDirectory, filename, options.props, callback)
+        })
     }
 }

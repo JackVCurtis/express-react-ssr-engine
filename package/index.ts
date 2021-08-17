@@ -1,31 +1,32 @@
 import path from 'path'
-import express from 'express'
+import express, { Application } from 'express'
 
 import { compile } from './compiler'
 import { renderFnFactory } from './renderer'
 
-export interface ReactSSRCache {
-  [key: string]: { contentPath: string, component?: any, hash?: string }
-}
 
 export interface ReactSSROptions {
   externals: object
 }
 
-const cache: ReactSSRCache = {}
+export class ReactSSREngine {
+  constructor(private viewDirectory: string, private options?: ReactSSROptions) { }
+  registerOn(app: Application) {
+    const renderFile = renderFnFactory(this.viewDirectory)
 
-export async function registerReactSSREngine(app: express.Application, viewDirectory: string, options?: ReactSSROptions): Promise<void> {
-  await compile(viewDirectory, cache, options)
-  const renderFile = renderFnFactory(cache, viewDirectory)
+    app.use('/react-ssr', express.static(path.join(this.viewDirectory, '..', 'dist')))
+    app.set('views', this.viewDirectory);
+    
+    if ((process as any)[Symbol.for('ts-node.register.instance')] || process.env.NODE_ENV == "test") {
+      app.set('view engine', 'tsx');
+      app.engine('tsx', renderFile);
+    } else {
+      app.set('view engine', 'js');
+      app.engine('js', renderFile)
+    }
+  }
 
-  app.use('/react-ssr', express.static(path.join(viewDirectory, '..', 'dist')))
-  app.set('views', viewDirectory);
-  
-  if ((process as any)[Symbol.for('ts-node.register.instance')] || process.env.NODE_ENV == "test") {
-    app.set('view engine', 'tsx');
-    app.engine('tsx', renderFile);
-  } else {
-    app.set('view engine', 'js');
-    app.engine('js', renderFile)
+  async compile() {
+    await compile(this.viewDirectory, this.options)
   }
 }
