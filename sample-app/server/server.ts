@@ -1,6 +1,6 @@
 import path from 'path'
 import express, { Application, Request, Response } from "express"
-import { registerReactSSREngine } from "express-react-ssr-engine"
+import { registerReactSSREngine } from "@jackvcurtis/express-react-ssr-engine"
 import React from 'react'
 import ReactDOMServer from 'react-dom/server'
 
