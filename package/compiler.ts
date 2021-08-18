@@ -1,9 +1,8 @@
 import { webpack, Stats } from "webpack";
-import { ReactSSROptions } from "./index";
+import { DIST_ROUTE, ReactSSROptions } from "./index";
 import { glob } from 'glob'
 import path from 'path'
-import { engineFs, updateCache, ReactSSRCache } from './filesystem'
-import { stat } from "fs-extra";
+import { engineFs, updateCache, ReactSSRCache, getStaticDir } from './filesystem'
 
 function compilerFactory(viewDirectory: string, filename: string, bundleName: string, options: ReactSSROptions) {
     const externals = Object.assign({
@@ -29,7 +28,7 @@ function compilerFactory(viewDirectory: string, filename: string, bundleName: st
             asset: true
         },
         output: {
-            path: path.join(viewDirectory, '..', 'dist'),
+            path: getStaticDir(viewDirectory),
             filename: `${bundleName}.[hash].js`,
             publicPath: '/',
             library: {
@@ -125,11 +124,11 @@ export async function compile(viewDirectory: string, options: ReactSSROptions): 
                             if (ext.match(/(\.tsx?$)/) || ext.match(/(\.jsx?$)/)) {
                                 const bundleExt = 'js'
                                 const hash = stats.compilation.hash
-                                const contentPath = `/react-ssr/${bundleName}.${hash}.${bundleExt}`
+                                const contentPath = `${DIST_ROUTE}/${bundleName}.${hash}.${bundleExt}`
                                 cache[file] = { contentPath, hash }
                             } else if (ext.match(/\.(sa|sc|c)ss$/)) {
                                 const assetName = Object.keys(stats.compilation.assets).find(k => k.match(/\.css$/))
-                                const contentPath = `/react-ssr/${assetName}`
+                                const contentPath = `${DIST_ROUTE}/${assetName}`
                                 cache[file] = { contentPath }
                             } else {
                                 throw new Error(`express-react-ssr-engine: Unsupported File Type ${ext}`)
@@ -142,7 +141,6 @@ export async function compile(viewDirectory: string, options: ReactSSROptions): 
             Promise.all(fileCompilationPromises)
                 .then(() => {
                     updateCache(viewDirectory, cache)
-                    console.log("cache updated")
                     resolve()
                 })
                 .catch(reject)

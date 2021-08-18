@@ -3,7 +3,9 @@ import express, { Application } from 'express'
 
 import { compile } from './compiler'
 import { renderFnFactory } from './renderer'
+import { getStaticDir } from './filesystem'
 
+export const DIST_ROUTE = '/erssr-dist'
 
 export interface ReactSSROptions {
   externals: object
@@ -14,7 +16,7 @@ export class ReactSSREngine {
   registerOn(app: Application) {
     const renderFile = renderFnFactory(this.viewDirectory)
 
-    app.use('/react-ssr', express.static(path.join(this.viewDirectory, '..', 'dist')))
+    app.use(DIST_ROUTE, express.static(getStaticDir(this.viewDirectory)))
     app.set('views', this.viewDirectory);
     
     if ((process as any)[Symbol.for('ts-node.register.instance')] || process.env.NODE_ENV == "test") {
