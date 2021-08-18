@@ -1,6 +1,6 @@
 import { User } from "../../components/User";
 
-export default function UsersIndex({ users }) {
+export default function UsersPage({ users }) {
     return (
         <div>
             <h1>Users</h1>

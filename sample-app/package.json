@@ -5,7 +5,8 @@
   "main": "build/index.js",
   "scripts": {
     "test": "jest -i",
-    "build": "tsc && cp -r server/views/templates build/views && cp -r server/views/styles build/views && cp -r server/components/styles build/components",
+    "build": "tsc && npm run copy-all",
+    "copy-all": "copyfiles server/views/templates build/views && copyfiles -r server/views/styles build/views && copyfiles -r server/components/styles build/components",
     "start": "ts-node server",
     "clean": "rm -r server/dist && rm -r build"
   },
@@ -24,6 +25,7 @@
     "@jackvcurtis/express-react-ssr-engine": "^0.3.2",
     "babel-loader": "^8.2.2",
     "bootstrap": "^5.0.2",
+    "copyfiles": "^2.4.1",
     "express": "^4.17.1",
     "file-loader": "^6.2.0",
     "react": "^17.0.2",
@@ -43,6 +45,7 @@
     "@types/testing-library__jest-dom": "^5.14.1",
     "@types/testing-library__react": "^10.2.0",
     "jest": "^27.0.6",
+    "supertest": "^6.1.6",
     "ts-jest": "^27.0.4",
     "ts-node": "^10.2.0"
   }

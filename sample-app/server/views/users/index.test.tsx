@@ -1,9 +1,9 @@
 import {render, waitFor, screen} from '@testing-library/react'
-import UserIndex from './index'
+import UsersPage from './index'
 
-describe("UserIndex Component", () => {
+describe("UsersPage Component", () => {
     it("Renders successfully", async () => {
-        render(<UserIndex users={[{name: 'foobar'}]}/>)
+        render(<UsersPage users={[{name: 'foobar'}]}/>)
         await waitFor(() => screen.getByRole('heading'))
         expect(screen.getByText('foobar')).toBeTruthy()
     })
