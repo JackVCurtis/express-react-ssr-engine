@@ -1,6 +1,6 @@
 {
   "name": "@jackvcurtis/express-react-ssr-engine",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "a view engine for express that mounts server-side-rendered React apps",
   "main": "build/index.js",
   "typings": "build/index.d.ts",
