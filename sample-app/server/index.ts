@@ -1,19 +1,8 @@
-import { ReactSSREngine } from '@jackvcurtis/express-react-ssr-engine'
 import throng from 'throng'
-import path from 'path'
 import express from 'express'
 import { configureServer } from './server'
+import { engine } from './engine'
 
-const engine = new ReactSSREngine(path.join(__dirname, 'views'), {
-    externals: {
-        "react-bootstrap": {
-            commonjs: "react-bootstrap",
-            commonjs2: "react-bootstrap",
-            amd: "ReactBootstrap",
-            root: "ReactBootstrap"
-        }
-    }
-})
 throng({
     master: async function() {
         await engine.compile()

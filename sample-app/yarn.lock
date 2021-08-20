@@ -1000,10 +1000,10 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.3.tgz#e45e384e4b8ec16bce2fd903af78450f6bf7ec98"
   integrity sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==
 
-"@jackvcurtis/express-react-ssr-engine@^0.3.4":
-  version "0.3.4"
-  resolved "https://registry.yarnpkg.com/@jackvcurtis/express-react-ssr-engine/-/express-react-ssr-engine-0.3.4.tgz#bb4c24a297da69a5bfae4ff41f885010acd64e77"
-  integrity sha512-i318NqNbHPX+Sl1Q2O4/gaF5cfPjBfacCI4o0rIkUIXDFdD2INQY23WaV2J8FwxoLBswv4yqD2VYN13ahwSBLw==
+"@jackvcurtis/express-react-ssr-engine@^0.3.8":
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@jackvcurtis/express-react-ssr-engine/-/express-react-ssr-engine-0.3.8.tgz#3f0e8d93e8a1259677b76926441963ef018523ea"
+  integrity sha512-vdQBU/JNvjvHzYQHcPKlxeqNaKMhejnkyRs1HhEhe1o0Rvg/K6dLFBcCR2kvSI8ZOMLki+MP5tpdP/tyg+r11Q==
   dependencies:
     express "^4.17.1"
     glob "^7.1.7"

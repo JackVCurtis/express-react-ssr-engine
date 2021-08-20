@@ -8,7 +8,7 @@ describe("registerReactSSREngine", () => {
     jest.setTimeout(30000);
 
     it("should compile the mock views directory", async () => {
-        const engine = new ReactSSREngine(path.join(__dirname, 'mocks', 'mock_views'))
+        const engine = new ReactSSREngine(path.join(__dirname, 'mocks', 'mock_views'), { fileExtension: 'tsx' })
         await engine.compile()
         const app = express()
         engine.registerOn(app)
