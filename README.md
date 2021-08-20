@@ -2,6 +2,13 @@
 
 ## UNDER CONSTRUCTION - Please don't use yet!
 
+`express-react-ssr-engine` is a view engine for `express` with a built-in compilation and server-side-rendering capabilities for React. It offers an alternative approach to NextJS for enabling easy integration of isomorphic Javascript or Typescript with SSR and multiple React app entrypoints. The approach is intended to produce a flexible library that can be easily integrated into an existing `express` stack without configuring a build pipeline. It accomplishes this by compiling views at runtime during server startup, so be aware of the tradeoffs that decision represents - ensure that you have a proper CI pipeline in place to mitigate the risk of deploying a bad frontend build.
+
+This library is a work in progress. Contributions and constructive criticism are welcome. Current priorities are:
+1. Local development speed + experience
+2. Hardening the production environment
+3. Benchmarking - I have no idea how to do this properly, guidance here is especially welcome
+
 ## Basic Usage
 Install peer dependencies:
 ```
@@ -11,7 +18,7 @@ Note that because compilation is done at runtime, `webpack` packages are regular
 
 Install the library
 ```
-npm install @jackvcurtis/express-react-ssr-engine
+npm i --save @jackvcurtis/express-react-ssr-engine
 ```
 
 ### Folder Structure
@@ -38,7 +45,7 @@ Each file must also export a functional React component _by default_. Props are 
 ```javascript
 app.get('/', (req, res) => res.render( { props: { /* your props here */} } ))
 ```
- Every file in your view directory will be treated as an _entry point_ to a React app, and will be _independently compiled_. That means if you place your reusable components inside your view directory, they will be unnecessarily compiled - instead, place a `/components` (or whatever you choose to name it), and `import` them into your main views.
+ Every file in your view directory will be treated as an _entry point_ to a React app, and will be _independently compiled_. That means if you place your reusable components inside your view directory, they will be unnecessarily compiled - instead, place a `/components` directory at the same level as your view directory, and `import` them into your main views. Styles from these components currently have to be imported independently in the `/styles` directory within your view directory (see Styles section below).
 
 #### Layout
 
