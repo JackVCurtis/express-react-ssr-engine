@@ -17,7 +17,8 @@ function render(cache: ReactSSRCache, component: any, template: any, viewDirecto
         reactScriptPath: cached.contentPath,
         reactHtml: reactHtml,
         reactProps: JSON.stringify(props),
-        stylePath: cachedStyle ? cachedStyle.contentPath : ''
+        stylePath: cachedStyle ? cachedStyle.contentPath : '',
+        nodeEnv: process.env.NODE_ENV
     }, templateModel || {})))
 }
 
