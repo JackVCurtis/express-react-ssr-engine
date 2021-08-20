@@ -1,14 +1,13 @@
 {
   "name": "@jackvcurtis/express-react-ssr-engine",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "a view engine for express that mounts server-side-rendered React apps",
   "main": "build/index.js",
   "typings": "build/index.d.ts",
   "scripts": {
     "test": "jest -i",
     "build": "tsc --declaration",
-    "clean": "rm -r build",
-    "publish": "npm run clean && npm run build"
+    "clean": "rm -r build"
   },
   "keywords": [
     "express"
