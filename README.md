@@ -1,6 +1,6 @@
 # express-react-ssr-engine
 
-## UNDER CONSTRUCTION - Please don't use yet!
+## UNDER CONSTRUCTION
 
 `express-react-ssr-engine` is a view engine for `express` with a built-in compilation and server-side-rendering capabilities for React. It offers an alternative approach to NextJS for enabling easy integration of isomorphic Javascript or Typescript with SSR and multiple React app entrypoints. The approach is intended to produce a flexible library that can be easily integrated into an existing `express` stack without configuring a build pipeline. It accomplishes this by compiling views at runtime during server startup, so be aware of the tradeoffs that decision represents - ensure that you have a proper CI pipeline in place to mitigate the risk of deploying a bad frontend build.
 
