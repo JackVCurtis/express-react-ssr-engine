@@ -24,12 +24,9 @@ function compilerFactory(viewDirectory: string, filename: string, bundleName: st
         entry: {
             index: filename,
         },
-        experiments: {
-            asset: true
-        },
         output: {
             path: getStaticDir(viewDirectory),
-            filename: `${bundleName}.[hash].js`,
+            filename: `${bundleName}.[fullhash].js`,
             publicPath: '/',
             library: {
                 name: "App",
